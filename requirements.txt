@@ -1,1 +1,6 @@
 streamlit
+google-cloud-aiplatform
+google-auth
+Pillow
+streamlit-js_eval
+toml
