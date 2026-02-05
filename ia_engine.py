@@ -6,7 +6,7 @@ import io
 import config_prompt
 
 def conectar_vertex(creds_dict):
-    """Establece la conexión usando el SDK genai."""
+    """Establece la conexión usando el nuevo SDK de GenAI."""
     raw_key = str(creds_dict.get("private_key", ""))
     clean_key = raw_key.strip().strip('"').strip("'").replace("\\n", "\n")
     creds_dict["private_key"] = clean_key
@@ -18,8 +18,7 @@ def conectar_vertex(creds_dict):
                         location="us-central1", credentials=google_creds)
 
 def buscar_mercado_capa1(client, marca, modelo, anio, horas):
-    """CAPA 1: Búsqueda incluyendo horas en el prompt."""
-    # Pasamos los 4 parámetros al generador de prompts
+    """CAPA 1: Búsqueda y troceado de resultados por líneas."""
     prompt = config_prompt.prompt_capa_1_buscador(marca, modelo, anio, horas)
     try:
         response = client.models.generate_content(
@@ -31,12 +30,14 @@ def buscar_mercado_capa1(client, marca, modelo, anio, horas):
                 "max_output_tokens": 4096
             }
         )
-        return response.text
+        # Convertimos el texto en una lista de líneas, filtrando las vacías
+        lineas = [linea.strip() for linea in response.text.split("\n") if len(linea.strip()) > 10]
+        return lineas
     except Exception as e:
-        return f"Error en Capa 1: {str(e)}"
+        return [f"Error en Capa 1: {str(e)}"]
 
 def analizar_peritaje_capa3(client, marca, modelo, precio_base, observaciones, ubicacion, lista_fotos):
-    """CAPA 3: Análisis visual con 2.5 Pro."""
+    """CAPA 3: Peritaje visual con optimización de imágenes."""
     fotos_ia = []
     for foto in lista_fotos:
         img = Image.open(foto).convert("RGB")
