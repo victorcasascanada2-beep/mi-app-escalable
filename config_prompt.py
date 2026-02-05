@@ -4,7 +4,7 @@ def prompt_capa_1_buscador(marca, modelo, anio, horas):
     """CAPA 1: Búsqueda quirúrgica filtrada por horas y año."""
     return f"""
     Actúa como un Scraper Especializado en Maquinaria Agrícola.
-    Tu misión es encontrar 10 anuncios reales de venta para: {marca} {modelo} del año {anio}.
+    Tu misión es encontrar 50 anuncios si es posible, anuncios reales de venta para: {marca} {modelo} del año {anio}.
     
     [FILTRO DE USO]
     Prioriza unidades que tengan aproximadamente {horas} horas de trabajo. 
