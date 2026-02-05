@@ -13,7 +13,6 @@ if "GOOGLE_SECRETS_JSON" in os.environ:
     except Exception as e:
         st.error(f"Error en credenciales: {e}")
 
-# 1. CONFIGURACIÓN
 st.set_page_config(page_title="Tasador Agrícola Noroeste", page_icon="🚜", layout="wide")
 
 if "vertex_client" not in st.session_state:
@@ -32,54 +31,58 @@ st.title("🚜 Sistema de Tasación Experta")
 
 # --- FLUJO POR CAPAS ---
 
-# CAPA 1: BÚSQUEDA Y FILTRADO POR HORAS
 if st.session_state.paso == 1:
-    st.header("1. Análisis de Mercado y Selección")
+    st.header("1. Análisis de Mercado (Búsqueda Real)")
     
     with st.container(border=True):
-        col1, col2, col3, col4 = st.columns(4)
-        with col1: marca = st.text_input("Marca", "Valtra")
-        with col2: modelo = st.text_input("Modelo", "G125")
-        with col3: anio = st.number_input("Año", value=2025)
-        with col4: horas = st.number_input("Horas actuales", value=0)
+        c1, c2, c3, c4 = st.columns(4)
+        with c1: marca = st.text_input("Marca", "Valtra")
+        with c2: modelo = st.text_input("Modelo", "G125")
+        with c3: anio = st.number_input("Año", value=2025)
+        with c4: horas = st.number_input("Horas actuales", value=0)
 
         if st.button("🔍 BUSCAR REFERENCIAS"):
-            with st.spinner(f"Buscando {marca} con {horas}h..."):
-                # Enviamos las 5 variables necesarias
-                res = ia_engine.buscar_mercado_capa1(st.session_state.vertex_client, marca, modelo, anio, horas)
-                st.session_state.anuncios_raw = res
+            with st.spinner("Rastreando anuncios..."):
+                res_list = ia_engine.buscar_mercado_capa1(st.session_state.vertex_client, marca, modelo, anio, horas)
+                st.session_state.anuncios_raw = res_list
                 st.session_state.marca, st.session_state.modelo = marca, modelo
-                st.session_state.paso_sub = "seleccion"
                 st.rerun()
 
     if "anuncios_raw" in st.session_state:
         st.divider()
-        st.markdown(st.session_state.anuncios_raw)
+        st.subheader("Selecciona los anuncios válidos para la tasación:")
         
-        # Filtro Booleano sencillo
-        opciones = ["Referencia 1", "Referencia 2", "Referencia 3", "Referencia 4"]
-        seleccionados = st.multiselect("Selecciona las que entrarán en la media:", opciones, default=opciones[:2])
+        anuncios_finales = []
+        # Bucle dinámico: Crea un checkbox por cada anuncio devuelto
+        for i, anuncio in enumerate(st.session_state.anuncios_raw):
+            # Evitamos mostrar encabezados de tabla o líneas raras
+            if "|" in anuncio and "---" not in anuncio and "Portal" not in anuncio:
+                if st.checkbox(anuncio, key=f"anuncio_{i}"):
+                    anuncios_finales.append(anuncio)
         
-        if st.button("🚀 CONFIRMAR SELECCIÓN"):
-            st.session_state.paso = 2
-            st.rerun()
+        if st.button("🚀 CONFIRMAR SELECCIÓN Y CONTINUAR"):
+            if not anuncios_finales:
+                st.warning("Selecciona al menos un anuncio para validar el precio.")
+            else:
+                st.session_state.anuncios_validados = anuncios_finales
+                st.session_state.paso = 2
+                st.rerun()
 
-# CAPA 2: VALIDACIÓN DE PRECIO
 elif st.session_state.paso == 2:
-    st.header("2. Precio Base de Mercado")
-    precio_medio = st.number_input("Establece el Precio Base (€):", value=90000)
-    if st.button("✅ IR AL PERITAJE"):
-        st.session_state.precio_base = precio_medio
+    st.header("2. Precio Base")
+    st.write(f"Has validado {len(st.session_state.anuncios_validados)} referencias.")
+    precio_base = st.number_input("Establece el Precio Base (€):", value=90000)
+    if st.button("✅ IR A INSPECCIÓN VISUAL"):
+        st.session_state.precio_base = precio_base
         st.session_state.paso = 3
         st.rerun()
 
-# CAPA 3: PERITAJE VISUAL
 elif st.session_state.paso == 3:
-    st.header("3. Inspección Visual")
-    obs = st.text_area("Notas del estado")
-    fotos = st.file_uploader("Fotos", accept_multiple_files=True)
-    if st.button("🚀 GENERAR INFORME"):
-        with st.spinner("Analizando..."):
+    st.header("3. Peritaje y Fotos")
+    obs = st.text_area("Notas sobre el estado")
+    fotos = st.file_uploader("Subir fotos", accept_multiple_files=True)
+    if st.button("🚀 GENERAR INFORME FINAL"):
+        with st.spinner("Gemini analizando..."):
             informe = ia_engine.analizar_peritaje_capa3(
                 st.session_state.vertex_client, st.session_state.marca, 
                 st.session_state.modelo, st.session_state.precio_base, 
@@ -89,10 +92,9 @@ elif st.session_state.paso == 3:
             st.session_state.paso = 4
             st.rerun()
 
-# CAPA 4: RESULTADO
 elif st.session_state.paso == 4:
-    st.header("🏁 Informe Final")
+    st.header("🏁 Resultado Final")
     st.markdown(st.session_state.informe_final)
-    if st.button("🔄 NUEVA CONSULTA"):
+    if st.button("🔄 NUEVA TASACIÓN"):
         st.session_state.clear()
         st.rerun()
