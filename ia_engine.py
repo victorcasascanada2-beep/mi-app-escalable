@@ -6,7 +6,7 @@ import io
 import config_prompt
 
 def conectar_vertex(creds_dict):
-    """Establece la conexión usando el nuevo SDK de GenAI."""
+    """Establece la conexión usando el SDK genai."""
     raw_key = str(creds_dict.get("private_key", ""))
     clean_key = raw_key.strip().strip('"').strip("'").replace("\\n", "\n")
     creds_dict["private_key"] = clean_key
@@ -14,13 +14,13 @@ def conectar_vertex(creds_dict):
         creds_dict, 
         scopes=["https://www.googleapis.com/auth/cloud-platform"]
     )
-    # Usamos el cliente genai que tú ya conoces
     return genai.Client(vertexai=True, project=creds_dict.get("project_id"), 
                         location="us-central1", credentials=google_creds)
 
-def buscar_mercado_capa1(client, marca, modelo, anio):
-    """CAPA 1: Búsqueda de mercado con Google Search y 2.5 Pro."""
-    prompt = config_prompt.prompt_capa_1_buscador(marca, modelo, anio)
+def buscar_mercado_capa1(client, marca, modelo, anio, horas):
+    """CAPA 1: Búsqueda incluyendo horas en el prompt."""
+    # Pasamos los 4 parámetros al generador de prompts
+    prompt = config_prompt.prompt_capa_1_buscador(marca, modelo, anio, horas)
     try:
         response = client.models.generate_content(
             model="gemini-2.5-pro",
@@ -36,7 +36,7 @@ def buscar_mercado_capa1(client, marca, modelo, anio):
         return f"Error en Capa 1: {str(e)}"
 
 def analizar_peritaje_capa3(client, marca, modelo, precio_base, observaciones, ubicacion, lista_fotos):
-    """CAPA 3: Peritaje visual con optimización de fotos."""
+    """CAPA 3: Análisis visual con 2.5 Pro."""
     fotos_ia = []
     for foto in lista_fotos:
         img = Image.open(foto).convert("RGB")
@@ -52,10 +52,7 @@ def analizar_peritaje_capa3(client, marca, modelo, precio_base, observaciones, u
         response = client.models.generate_content(
             model="gemini-2.5-pro",
             contents=[prompt] + fotos_ia,
-            config={
-                "temperature": 0.35,
-                "max_output_tokens": 4096
-            }
+            config={"temperature": 0.35, "max_output_tokens": 4096}
         )
         return response.text
     except Exception as e:
