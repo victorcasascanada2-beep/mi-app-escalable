@@ -1,15 +1,23 @@
 # config_prompt.py
 
 def prompt_capa_1_buscador(marca, modelo, anio):
-    """CAPA 1: Solo busca anuncios reales y extrae datos crudos."""
+    """CAPA 1: Búsqueda quirúrgica de anuncios reales."""
     return f"""
-    Actúa como un Scraper Especializado en Maquinaria Agrícola.
-    Tu única misión es encontrar 10 anuncios reales de venta para: {marca} {modelo} del año {anio}.
+    Eres un Agente Especialista en Inteligencia de Mercado de Maquinaria Agrícola.
+    Tu misión es localizar anuncios de venta ACTIVOS para: {marca} {modelo} del año {anio}.
+
+    [ESTRATEGIA DE BÚSQUEDA]
+    1. Prioriza resultados de: Agriaffaires, Mascus, Traktorpool, E-農機 (si es exportación) y MilAnuncios.
+    2. Busca específicamente en el mercado Europeo (España, Francia, Alemania).
+
+    [FORMATO DE SALIDA OBLIGATORIO]
+    Presenta los resultados en una tabla Markdown con estas columnas:
+    | Portal | Título del Anuncio | Precio (€) | Horas | Ubicación | Enlace (si disponible) |
     
-    [INSTRUCCIONES]
-    1. Usa Google Search para localizar anuncios en portales como Agriaffaires, Mascus, Traktorpool o MilAnuncios.
-    2. Extrae de cada anuncio: Título, Precio, Horas y Año.
-    3. No analices nada todavía, solo muestra los resultados en una lista clara.
+    [NOTAS TÉCNICAS]
+    - Si no encuentras el año exacto {anio}, busca un rango cercano (±2 años).
+    - No inventes precios. Si no hay precio visible, pon "Consultar".
+    - Finaliza con una frase: "Listo para la Capa 2: Selección de media truncada."
     """
 
 def prompt_capa_2_analista(datos_seleccionados):
