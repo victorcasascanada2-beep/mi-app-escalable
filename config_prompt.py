@@ -3,7 +3,7 @@
 def prompt_capa_1_buscador(marca, modelo, anio, horas):
     """CAPA 1: Búsqueda quirúrgica filtrada por horas y año."""
      return f"""  
-     Usa Google Search para localizar anuncios en el portal agriaffaires
+     Usa Google Search para localizar anuncios en el portal agriaffaires.
      Presenta los resultados en una TABLA Markdown clara incluyendo link de la ubicacion.
      """
     # Actúa como un Scraper Especializado en Maquinaria Agrícola.
