@@ -15,7 +15,7 @@ def conectar_vertex(creds_dict):
         scopes=["https://www.googleapis.com/auth/cloud-platform"]
     )
     return genai.Client(vertexai=True, project=creds_dict.get("project_id"), 
-                        location="us-central1", credentials=google_creds)
+                        location="europe-southwest1", credentials=google_creds)
 
 def buscar_mercado_capa1(client, marca, modelo, anio, horas):
     """CAPA 1: Búsqueda y troceado de resultados por líneas."""
