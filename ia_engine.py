@@ -22,7 +22,7 @@ def buscar_mercado_capa1(client, marca, modelo, anio, horas):
     prompt = config_prompt.prompt_capa_1_buscador(marca, modelo, anio, horas)
     try:
         response = client.models.generate_content(
-            model="gemini-2.5-pro",
+            model="gemini-1.5-pro",
             contents=[prompt],
             config={
                 "tools": [{"google_search": {}}],
