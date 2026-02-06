@@ -4,17 +4,10 @@
 def prompt_capa_1_buscador(marca, modelo, anio, horas):
     """CAPA 1: Búsqueda quirúrgica filtrada por horas y año."""
     return f"""
-    Actúa como un Scraper Especializado en Maquinaria Agrícola.
+    Actúa como un Scraper Especializado en Maquinaria Agrícola. BUsca en agriaffaires.com.
     Tu misión es encontrar 50 anuncios si es posible, anuncios reales de venta para: {marca} {modelo} del año {anio}.
-    
-    [FILTRO DE USO]
-    Prioriza unidades que tengan aproximadamente {horas} horas de trabajo. 
-    Es vital encontrar anuncios con un desgaste similar para una tasación justa.
-    
-    [INSTRUCCIONES]
-    1. Usa Google Search para localizar anuncios en portales como Agriaffaires, Mascus, Traktorpool o MilAnuncios.
-    2. Extrae de cada anuncio: Título, Precio (€), Horas Reales y Ubicación.
-    3. Presenta los resultados en una TABLA Markdown clara.
+    Extrae de cada anuncio: Título, Precio (€), Horas Reales y Ubicación.
+    Presenta los resultados en una TABLA Markdown clara.
     """
 
 def prompt_capa_2_analista(datos_seleccionados):
