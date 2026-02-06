@@ -51,7 +51,7 @@ def analizar_peritaje_capa3(client, marca, modelo, precio_base, observaciones, u
 
     try:
         response = client.models.generate_content(
-            model="gemini-2.5-pro",
+            model="gemini-1.5-pro",
             contents=[prompt] + fotos_ia,
             config={"temperature": 0.35, "max_output_tokens": 4096}
         )
